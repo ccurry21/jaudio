@@ -1,9 +1,10 @@
-CTYPE html>
+<!DOCTYPE html>
 <html>
 
 <head>
     <meta charset=utf-8>
     <title>A sample audio test</title>
+    <ascript src="http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js"></ascript>
     <style>
         body {
             margin: 0;
@@ -12,9 +13,44 @@ CTYPE html>
 </head>
 
 <body>
+    Welcome to a crappy test!
     <script src="js/three.js"></script>
     <script>
-        var audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+        function gotStream(stream) {
+            // Create an AudioNode from the stream.
+            var input = audioContext.createMediaStreamSource(stream);
+        };
+
+        function initAudio() {
+            window.AudioContext = window.AudioContext || window.webkitAudioContext;
+            var audioContext = new AudioContext();
+            var constraints =
+            {
+              audio: {
+                  optional: [{ echoCancellation: false }]
+              }
+            };
+
+            if (!navigator.getUserMedia)
+                navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+            if (!navigator.getUserMedia)
+                return (alert("Error: getUserMedia not supported!"));
+
+            navigator.getUserMedia(constraints, gotStream, function(e) {
+                alert('Error getting audio');
+                console.log(e);
+            });
+
+            if ((typeof MediaStreamTrack === 'undefined') || (!MediaStreamTrack.getSources)) {
+                console.log("Error: MediaStreamTrack not supported by this browser.");
+            } else {
+                MediaStreamTrack.getSources(gotSources);
+            }
+        };
+
+        window.addEventListener('load', initAudio);
+
     </script>
 </body>
 
